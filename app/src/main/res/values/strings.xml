@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+
+    <string name="query_top_rated">top_rated</string>
+    <string name="query_popular">popular</string>
+
+    <string name="title_top_rated">Top Rated</string>
+    <string name="title_popular">Popular</string>
+    <string name="transitionName">transition_movie_image</string>
+
+    <string name="EXTRA_TITLE">EXTRA_TITLE</string>
+    <string name="EXTRA_DESC">EXTRA_DESC</string>
+    <string name="EXTRA_DATE">EXTRA_DATE</string>
+    <string name="EXTRA_RATING">EXTRA_RATING</string>
+    <string name="EXTRA_POSTER">EXTRA_POSTER</string>
+    <string name="EXTRA_BACKDROP">EXTRA_BACKDROP</string>
+
+    <string name="rating">Avg. Rating:</string>
+    <string name="summary">Summary:</string>
+    <string name="date">Release Date:</string>
+
+    <string name="content_desc">Image</string>
+
+
+
+</resources>
