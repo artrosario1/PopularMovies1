@@ -1,12 +1,13 @@
 package com.softcap.artrosario.popularmovies.model;
 
 
-/*
+/****
+SAMPLE JSON
  "page": 1,
   "total_results": 7297,
   "total_pages": 365,
   "results": [
- */
+ ****/
 
 import com.google.gson.annotations.SerializedName;
 

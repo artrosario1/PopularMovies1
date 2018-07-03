@@ -5,12 +5,18 @@
         android:title="@string/title_top_rated"
         android:id="@+id/item_top_rated_movies"
         android:orderInCategory="1"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
     <item
         android:title="@string/title_popular"
         android:id="@+id/item_popular_movies"
         android:orderInCategory="2"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
+
+    <item
+    android:title="Favorites"
+    android:id="@+id/item_favorite_movies"
+    android:orderInCategory="3"
+    app:showAsAction="never"/>
 
 
 </menu>

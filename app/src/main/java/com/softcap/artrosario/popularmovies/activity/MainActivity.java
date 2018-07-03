@@ -1,10 +1,11 @@
 package com.softcap.artrosario.popularmovies.activity;
 
-
-
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,9 +18,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.softcap.artrosario.popularmovies.BuildConfig;
 import com.softcap.artrosario.popularmovies.R;
 import com.softcap.artrosario.popularmovies.adapter.MoviesAdapter;
+import com.softcap.artrosario.popularmovies.database.FavoritesDatabase;
+import com.softcap.artrosario.popularmovies.database.MainViewModel;
 import com.softcap.artrosario.popularmovies.model.Movie;
 import com.softcap.artrosario.popularmovies.model.MovieResponse;
 import com.softcap.artrosario.popularmovies.rest.MovieApiService;
@@ -41,10 +43,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static Retrofit retrofit;
     private RecyclerView recyclerView;
     private MoviesAdapter.MovieAdapterOnClickHandler mMoviesHandler;
-    private ArrayList<Movie> movies;
+    private ArrayList<Movie> moviesArrayList;
 
-    //insert API key here
-    private final static String API_KEY = "API_KEY";
+
+    private FavoritesDatabase mDb;
+    private boolean isFavorite;
+
+
+    //TODO: insert API key here
+    private final static String API_KEY = "INSERT API KEY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,18 +62,21 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mMoviesHandler = this;
 
+
         if(savedInstanceState == null || !savedInstanceState.containsKey("MoviesArray") ){
             connectAndGetData(getString(R.string.query_top_rated));
-        }else{
-            movies = savedInstanceState.getParcelableArrayList("MoviesArray");
-            recyclerView.setAdapter(new MoviesAdapter(movies, R.layout.movie_item, getApplicationContext(), mMoviesHandler));
+            mDb = FavoritesDatabase.getsInstance(getApplicationContext());
+        }
 
+        else{
+            moviesArrayList = savedInstanceState.getParcelableArrayList("MoviesArray");
+            recyclerView.setAdapter(new MoviesAdapter(moviesArrayList, R.layout.movie_item, getApplicationContext(), mMoviesHandler));
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("MoviesArray", movies);
+        outState.putParcelableArrayList("MoviesArray", moviesArrayList);
         super.onSaveInstanceState(outState);
     }
 
@@ -77,17 +87,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
-
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
 
         Call<MovieResponse> call = movieApiService.getMovies(category, API_KEY);
         call.enqueue(new Callback<MovieResponse>() {
+
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    movies = Objects.requireNonNull(response.body()).getResults();
+                    moviesArrayList = Objects.requireNonNull(response.body()).getResults();
                 }
-                recyclerView.setAdapter(new MoviesAdapter(movies, R.layout.movie_item, getApplicationContext(),mMoviesHandler));
+
+                recyclerView.setAdapter(new MoviesAdapter(moviesArrayList, R.layout.movie_item, getApplicationContext(),mMoviesHandler));
             }
 
             @Override
@@ -95,6 +106,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 Log.e(TAG, t.toString());
             }
         });
+    }
+
+
+    public void setupViewModel(){
+        final MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+            viewModel.getFavorites().observe(this, new Observer<List<Movie>>() {
+                @Override
+
+                public void onChanged(@Nullable List<Movie> movies) {
+                    Log.d("Message: ", "Receiving list from LiveData inViewModel");
+                    moviesArrayList = (ArrayList) movies;
+                    recyclerView.setAdapter(new MoviesAdapter(moviesArrayList, R.layout.movie_item, getApplicationContext(), mMoviesHandler));
+                }
+            });
     }
 
     @Override
@@ -112,31 +137,27 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             connectAndGetData(getString(R.string.query_popular));
         } else if(menuItemSelected == R.id.item_top_rated_movies){
             connectAndGetData(getString(R.string.query_top_rated));
+        } else if(menuItemSelected == R.id.item_favorite_movies){
+            setupViewModel();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(String titleForMovie , String descForMovie, String posterUrl,
-                        String backdropUrl, View view, String dateForMovie, String ratingForMovie )
-    {
-        Context context = this;
-        Class destinationClass = DetailActivity.class;
-        Intent intentSegue = new Intent(context, destinationClass);
-        String transitionName = getString(R.string.transitionName);
 
+    @Override
+    public void onItemClick(View view, Movie movie) {
+        Context context = getApplicationContext();
+        Class destinationClass = DetailActivity.class;
+        Intent intent = new Intent(context, destinationClass);
+
+        String transitionName = getString(R.string.transitionName);
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
                 view, transitionName);
-        Bundle extras = new Bundle();
-        extras.putString(getString(R.string.EXTRA_TITLE) , titleForMovie);
-        extras.putString(getString(R.string.EXTRA_DESC), descForMovie);
-        extras.putString(getString(R.string.EXTRA_POSTER), posterUrl);
-        extras.putString(getString(R.string.EXTRA_BACKDROP), backdropUrl);
-        extras.putString(getString(R.string.EXTRA_DATE), dateForMovie);
-        extras.putString(getString(R.string.EXTRA_RATING), ratingForMovie);
+        Movie thisMovie = movie;
+        final String id = thisMovie.getId();
 
-        intentSegue.putExtras(extras);
-
-        ActivityCompat.startActivity(this, intentSegue, options.toBundle());
+        intent.putExtra("ThisMovie", thisMovie);
+        ActivityCompat.startActivity(this, intent, options.toBundle());
     }
+
 }
