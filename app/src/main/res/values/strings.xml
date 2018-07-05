@@ -7,6 +7,7 @@
     <string name="title_top_rated">Top Rated</string>
     <string name="title_popular">Popular</string>
     <string name="transitionName">transition_movie_image</string>
+    <string name="error_string">Failed to get results, please check internet connection.</string>
 
     <string name="EXTRA_TITLE">EXTRA_TITLE</string>
     <string name="EXTRA_DESC">EXTRA_DESC</string>

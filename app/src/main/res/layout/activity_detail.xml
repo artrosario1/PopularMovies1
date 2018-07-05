@@ -44,6 +44,7 @@
             android:padding="4dp"
             android:scaleType="fitXY"
             android:transitionName="transition_movie_image"
+            android:adjustViewBounds="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -88,63 +89,68 @@
             app:layout_constraintTop_toBottomOf="@+id/horizontal_Stripe">
 
             <TextView
+                android:id="@+id/tv_release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:background="#B30d4351"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:paddingRight="6dp"
                 android:paddingTop="10dp"
                 android:text="@string/date"
                 android:textColor="@color/darkYellow"
-                android:textStyle="bold"
-                android:id="@+id/tv_release_date"
-                android:layout_alignParentLeft="true"/>
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
 
             <TextView
                 android:id="@+id/tv_movie_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/tv_release_date"
                 android:background="#B30d4351"
-                android:paddingEnd="5dp"
+                android:paddingEnd="15dp"
                 android:paddingLeft="10dp"
-                android:paddingRight="5dp"
+                android:paddingRight="15dp"
                 android:paddingStart="10dp"
-android:layout_below="@id/tv_release_date"/>
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_avg_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/tv_release_date"
                 android:background="#B30d4351"
-                android:paddingEnd="5dp"
+                android:paddingEnd="5.5dp"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:paddingRight="5.5dp"
                 android:paddingStart="5dp"
                 android:paddingTop="10dp"
                 android:text="@string/rating"
                 android:textColor="@color/darkYellow"
-                android:textStyle="bold"
-                android:id="@+id/tv_avg_rating"
-android:layout_toRightOf="@id/tv_release_date"
-              />
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
 
             <TextView
                 android:id="@+id/tv_movie_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="#B30d4351"
-                android:paddingEnd="5dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="5dp"
-                android:paddingStart="30dp"
                 android:layout_below="@id/tv_avg_rating"
+                android:layout_gravity="center"
                 android:layout_toRightOf="@id/tv_movie_date"
-
-/>
+                android:background="#B30d4351"
+                android:paddingEnd="40dp"
+                android:paddingLeft="33dp"
+                android:paddingRight="40dp"
+                android:paddingStart="33dp"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_movie_date"
                 android:background="#B30d4351"
                 android:paddingEnd="5dp"
                 android:paddingLeft="5dp"
@@ -153,10 +159,8 @@ android:layout_toRightOf="@id/tv_release_date"
                 android:paddingTop="10dp"
                 android:text="@string/summary"
                 android:textColor="@color/darkYellow"
-                android:textStyle="bold"
-                android:id="@+id/tv_summary"
-                android:layout_below="@+id/tv_movie_date"
-/>
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
 
             <TextView
                 android:id="@+id/tv_movie_desc"
@@ -167,25 +171,26 @@ android:layout_toRightOf="@id/tv_release_date"
                 android:paddingLeft="15dp"
                 android:paddingRight="5dp"
                 android:paddingStart="15dp"
+                android:textSize="15sp"
                 android:layout_below="@id/tv_summary"
 
 />
 
             <TextView
+                android:id="@+id/tv_trailers"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/tv_movie_desc"
                 android:background="#B30d4351"
                 android:paddingEnd="5dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:paddingStart="5dp"
                 android:paddingTop="10dp"
-                android:id="@+id/tv_trailers"
                 android:text="Trailers:"
                 android:textColor="@color/darkYellow"
-                android:textStyle="bold"
-                android:layout_below="@id/tv_movie_desc"
-/>
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_trailers"
@@ -194,12 +199,29 @@ android:layout_toRightOf="@id/tv_release_date"
                 android:background="#B30d4351"
                 android:padding="4dp"
                 android:layout_below="@id/tv_trailers"
+                android:nestedScrollingEnabled="true"
+                >
+            </android.support.v7.widget.RecyclerView>
 
+            <TextView
+                android:id="@+id/empty_trailers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:textColor="@color/darkYellow"
+
+                android:layout_alignWithParentIfMissing="true"
+                android:text="No Trailers Available"
+                android:layout_below="@id/tv_trailers"
+                android:visibility="gone"
                 />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/rv_trailers"
+                android:layout_alignWithParentIfMissing="true"
+                android:id="@+id/tv_reviews"
                 android:background="#B30d4351"
                 android:paddingEnd="5dp"
                 android:paddingLeft="5dp"
@@ -208,8 +230,8 @@ android:layout_toRightOf="@id/tv_release_date"
                 android:paddingTop="10dp"
                 android:text="Reviews:"
                 android:textColor="@color/darkYellow"
-                android:textStyle="bold"
-                android:layout_below="@+id/rv_trailers"
+                android:textSize="16sp"
+                android:textStyle="bold|italic"
 
                 />
 
@@ -223,9 +245,20 @@ android:layout_toRightOf="@id/tv_release_date"
             android:layout_height="wrap_content"
             android:background="#B30d4351"
             android:padding="4dp"
-            android:scrollX="@dimen/cardview_default_radius">
-
+            android:scrollX="@dimen/cardview_default_radius"
+            android:layout_alignWithParentIfMissing="true"
+            android:nestedScrollingEnabled="true">
         </android.support.v7.widget.RecyclerView>
+
+        <TextView
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+            android:id="@+id/empty_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#B30d4351"
+            android:padding="4dp"
+            android:visibility="gone"
+            android:text="No Reviews Available" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/favoritesButton"
@@ -243,20 +276,19 @@ android:layout_toRightOf="@id/tv_release_date"
             app:fabSize="normal"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:rippleColor="@color/colorTeal"
             app:srcCompat="@drawable/heart"
             />
 
         <RatingBar
             android:id="@+id/avgRatingBar"
-            style="?android:attr/ratingBarStyleSmall"
+            style="@style/Widget.AppCompat.RatingBar.Indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="50dp"
-            android:background="@color/colorGreen"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="55dp"
+            android:background="@color/colorTeal"
             android:clickable="false"
             android:numStars="5"
             android:stepSize="1.0"

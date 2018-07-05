@@ -27,6 +27,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.softcap.artrosario.popularmovies.BuildConfig;
 import com.softcap.artrosario.popularmovies.R;
 import com.softcap.artrosario.popularmovies.adapter.ReviewsAdapter;
 import com.softcap.artrosario.popularmovies.adapter.TrailersAdapter;
@@ -40,6 +41,9 @@ import com.softcap.artrosario.popularmovies.model.Trailer;
 import com.softcap.artrosario.popularmovies.rest.MovieApiService;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -51,7 +55,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DetailActivity extends AppCompatActivity implements TrailersAdapter.TrailerAdapterOnClickHandler{
 
-    private final static String API_KEY = "16ea02a5778193995fc7bd10805a4827";
+    //TODO: insert API key here
+    private final static String API_KEY = BuildConfig.API_KEY;;
     private static final String BASE_URL = "http://api.themoviedb.org/";
     private static Retrofit retrofit;
     private RecyclerView trailers_rv;
@@ -60,6 +65,8 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
     private TextView descriptionTextView;
     private TextView dateTextView;
     private TextView ratingTextView;
+    private TextView emptyReview;
+    private TextView emptyTrailer;
     private ImageView backgroundImageView;
     private ImageView horizontalImageView;
     private ArrayList<Trailer> trailersList;
@@ -71,18 +78,14 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
 
     public volatile boolean isFavorite;
     private FavoritesDatabase mDb;
-
-    private String mTitle;
-    private String mDesc;
-    private String mDate;
+    private String mId;
     private String mRating;
     private String mPosterUrl;
     private String mBackdropUrl;
-    private String mId;
 
     private Movie thisMovie;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +101,9 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
         horizontalImageView = findViewById(R.id.movieBackdrop);
         favoritesButton = findViewById(R.id.favoritesButton);
         ratingbar = findViewById(R.id.avgRatingBar);
+        emptyReview = findViewById(R.id.empty_reviews);
+        emptyTrailer = findViewById(R.id.empty_trailers);
+
 
         //Adds animation to move imageView to the left
         horizontalImageView.setTranslationX(1500);
@@ -128,19 +134,16 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
             mId = thisMovie.getId();
             connectAndGetVideos(mId);
             connectAndGetReviews(mId);
-
-            mTitle = thisMovie.getTitle();
-            titleTextView.setText(mTitle);
-            mDesc = thisMovie.getOverview();
-            descriptionTextView.setText(mDesc);
-            mDate = thisMovie.getReleaseDate();
-            dateTextView.setText(mDate);
+            titleTextView.setText(thisMovie.getTitle());
+            descriptionTextView.setText(thisMovie.getOverview());
+            dateTextView.setText(thisMovie.getReleaseDate());
             mRating = thisMovie.getVoteAverage().toString();
             ratingTextView.setText(mRating);
+
             mPosterUrl = thisMovie.getPosterPath();
             mBackdropUrl = thisMovie.getBackdropPath();
-
         }
+
         //Check if Movie is from Favorites Database to update UI
         thisMovie.setFavorite(checkIfInFavorites(mDb,mId));
 
@@ -165,12 +168,11 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
 
         //OnClick function for Favorites button
         favoritesButton.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
                 if (thisMovie.getFavorite()){
-
-                    favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorWhite)));
+                    favoritesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorTeal)));
+                    //favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorWhite)));
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
@@ -179,10 +181,9 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                         }
                     });
 
-
                 }else {
-
-                    favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
+                    favoritesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
+                    //favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
                     Double ratingNumber = Double.parseDouble(mRating);
                     final Date updatedAt = new Date();
 
@@ -201,8 +202,6 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
 
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private boolean checkIfInFavorites(FavoritesDatabase mDb, String mId) {
         AddFavoriteViewModelFactory factory = new AddFavoriteViewModelFactory(mDb, mId);
         final AddFavoriteViewModel viewModel = ViewModelProviders.of(this,
@@ -212,7 +211,8 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                     public void onChanged(@Nullable Movie movie) {
                         if (movie != null) {
                             thisMovie.setFavorite(true);
-                            favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
+                            favoritesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
+                            //favoritesButton.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPink)));
                         }
                     }
                 });
@@ -236,7 +236,13 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
             public void onResponse(Call<Trailer> call, Response<Trailer> response) {
                 trailersList = response.body().getResults();
                 trailers_rv.setAdapter(new TrailersAdapter(trailersList, R.layout.trailer_item, getApplicationContext(),mTrailersHandler));
-
+               /**** NOT working correctly
+                *
+                 if(trailersList.isEmpty()){
+                    showTrailerError();
+                }else{
+                    showTrailers();
+                }****/
             }
             @Override
             public void onFailure(Call<Trailer> call, Throwable t) {
@@ -244,6 +250,27 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
             }
         });
     }
+
+    private void showTrailers() {
+        trailers_rv.setVisibility(View.VISIBLE);
+        emptyTrailer.setVisibility(View.GONE);
+    }
+
+    private void showTrailerError() {
+        trailers_rv.setVisibility(View.GONE);
+        emptyTrailer.setVisibility(View.VISIBLE);
+    }
+
+    private void showReviews() {
+        reviews_rv.setVisibility(View.VISIBLE);
+        emptyReview.setVisibility(View.GONE);
+    }
+
+    private void showReviewError() {
+        reviews_rv.setVisibility(View.GONE);
+        emptyReview.setVisibility(View.VISIBLE);
+    }
+
 
     private void connectAndGetReviews(String id){
         if(retrofit == null){
@@ -261,6 +288,13 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
             public void onResponse(Call<Review> call, Response<Review> response) {
                 reviewsList = response.body().getResults();
                 reviews_rv.setAdapter(new ReviewsAdapter(reviewsList, R.layout.review_item, getApplicationContext()));
+                /***
+                 * Not working correctly
+                if(reviewsList.isEmpty()){
+                    showReviewError();
+                }else{
+                    showReviews();
+                }***/
             }
             @Override
             public void onFailure(Call<Review> call, Throwable t) {
