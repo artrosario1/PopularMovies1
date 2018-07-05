@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 @Override
                 public void onChanged(@Nullable List<Movie> movies) {
                     Log.d("Message: ", "Receiving list from LiveData inViewModel");
-                    viewModel.getFavorites().removeObserver(this);
+                    //viewModel.getFavorites().removeObserver(this);
                     moviesArrayList = (ArrayList) movies;
                     recyclerView.setAdapter(new MoviesAdapter(moviesArrayList, R.layout.movie_item, getApplicationContext(), mMoviesHandler));
                 }
